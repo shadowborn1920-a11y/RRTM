@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RRTM — Staff Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0a0a;--s1:#111;--s2:#161616;--s3:#1a1a1a;
+  --b1:#222;--b2:#2a2a2a;--b3:#333;
+  --w:#f0f0f0;--g:#666;--lg:#999;
+  --blue:#3b82f6;--blue2:rgba(59,130,246,0.1);
+  --green:#22c55e;--green2:rgba(34,197,94,0.1);
+  --red:#ef4444;--red2:rgba(239,68,68,0.1);
+  --yellow:#f59e0b;--yellow2:rgba(245,158,11,0.1);
+  --purple:#a855f7;--purple2:rgba(168,85,247,0.1);
+}
+body{background:var(--bg);color:var(--w);font-family:'Rajdhani',sans-serif;min-height:100vh;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--b3);border-radius:2px;}
+
+/* ══ LOGIN ══ */
+#login-view{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+.login-card{background:var(--s1);border:1px solid var(--b1);padding:40px;width:340px;border-radius:8px;}
+.lc-logo{text-align:center;margin-bottom:24px;}
+.lc-brand{font-family:'Bebas Neue';font-size:32px;letter-spacing:5px;color:#fff;}
+.lc-sub{font-size:10px;letter-spacing:3px;color:var(--g);font-family:'Share Tech Mono';}
+.lc-input{width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:6px;color:#fff;padding:11px 14px;font-family:'Rajdhani';font-size:13px;font-weight:600;outline:none;margin-bottom:10px;transition:border-color .2s;}
+.lc-input:focus{border-color:var(--blue);}
+.lc-btn{width:100%;background:var(--blue);color:#fff;font-family:'Rajdhani';font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:12px;border:none;border-radius:6px;cursor:pointer;transition:all .2s;margin-top:4px;}
+.lc-btn:hover{background:#2563eb;}
+.lc-err{color:var(--red);font-size:10px;font-family:'Share Tech Mono';text-align:center;margin-bottom:8px;display:none;}
+.lc-hint{font-size:10px;color:var(--g);text-align:center;margin-top:12px;font-family:'Share Tech Mono';}
+
+/* ══ APP ══ */
+#app-view{display:none;min-height:100vh;flex-direction:column;}
+#app-view.show{display:flex;}
+
+/* TOP NAV */
+.topnav{
+  height:56px;background:var(--s1);border-bottom:1px solid var(--b1);
+  display:flex;align-items:center;padding:0 20px;gap:14px;
+  position:sticky;top:0;z-index:100;flex-shrink:0;
+}
+.tn-logo{font-family:'Bebas Neue';font-size:20px;letter-spacing:4px;color:#fff;}
+.tn-logo span{color:var(--blue);}
+.tn-search{flex:1;max-width:280px;position:relative;}
+.tn-search input{width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:6px;color:#fff;padding:8px 14px 8px 36px;font-family:'Rajdhani';font-size:12px;font-weight:600;outline:none;transition:border-color .2s;}
+.tn-search input:focus{border-color:var(--blue);}
+.tn-search::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;}
+.tn-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.tn-date{font-family:'Share Tech Mono';font-size:10px;color:var(--g);}
+.tn-user{font-size:12px;font-weight:700;color:var(--lg);}
+.tn-logout{font-size:10px;font-weight:700;letter-spacing:1px;padding:5px 12px;background:transparent;color:var(--g);border:1px solid var(--b2);border-radius:4px;cursor:pointer;font-family:'Rajdhani';transition:all .2s;}
+.tn-logout:hover{color:#fff;border-color:var(--b3);}
+
+/* LAYOUT */
+.app-body{display:flex;flex:1;overflow:hidden;height:calc(100vh - 56px);}
+
+/* SIDEBAR */
+.sidebar{
+  width:210px;flex-shrink:0;
+  background:var(--s1);border-right:1px solid var(--b1);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+.sb-sec{font-size:9px;font-weight:700;letter-spacing:3px;color:var(--g);text-transform:uppercase;padding:14px 16px 5px;font-family:'Share Tech Mono';}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 16px;font-size:12px;font-weight:700;
+  letter-spacing:.5px;color:var(--g);cursor:pointer;
+  border-left:3px solid transparent;transition:all .2s;
+  text-transform:uppercase;
+}
+.sb-item:hover{color:var(--w);background:rgba(255,255,255,0.03);}
+.sb-item.on{color:var(--w);background:rgba(59,130,246,0.08);border-left-color:var(--blue);}
+.sb-ic{font-size:15px;width:20px;text-align:center;}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center;}
+.sb-foot{margin-top:auto;padding:12px 16px;border-top:1px solid var(--b1);font-size:9px;color:var(--g);font-family:'Share Tech Mono';}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:20px;}
+.page{display:none;}.page.on{display:block;}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:16px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--sc,var(--blue));border-radius:8px 8px 0 0;}
+.sc-label{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--g);text-transform:uppercase;font-family:'Share Tech Mono';margin-bottom:6px;}
+.sc-val{font-family:'Bebas Neue';font-size:36px;color:#fff;line-height:1;}
+.sc-sub{font-size:10px;color:var(--g);margin-top:3px;}
+.sc-ic{position:absolute;right:12px;top:14px;font-size:22px;opacity:.1;}
+
+/* PAGE HEADER */
+.pg-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.pg-title{font-family:'Bebas Neue';font-size:22px;letter-spacing:3px;color:#fff;}
+.pg-sub{font-size:11px;color:var(--g);margin-top:2px;font-family:'Share Tech Mono';}
+
+/* BUTTONS */
+.btn{font-family:'Rajdhani';font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:8px 16px;border-radius:6px;cursor:pointer;transition:all .2s;border:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-blue{background:var(--blue);color:#fff;}.btn-blue:hover{background:#2563eb;}
+.btn-out{background:transparent;color:var(--lg);border:1px solid var(--b2);}.btn-out:hover{border-color:var(--b3);color:#fff;}
+.btn-green{background:var(--green);color:#000;}.btn-green:hover{background:#16a34a;}
+.btn-red{background:var(--red2);color:var(--red);border:1px solid rgba(239,68,68,.2);}.btn-red:hover{background:rgba(239,68,68,.2);}
+.btn-sm{padding:4px 10px;font-size:10px;}
+.btn-yellow{background:var(--yellow2);color:var(--yellow);border:1px solid rgba(245,158,11,.2);}
+
+/* TABLE */
+.tbl-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+.tbl-wrap table{width:100%;border-collapse:collapse;}
+.tbl-wrap thead tr{background:var(--s2);border-bottom:1px solid var(--b1);}
+.tbl-wrap th{padding:10px 14px;font-size:9px;font-weight:700;letter-spacing:2px;color:var(--g);text-transform:uppercase;text-align:left;font-family:'Share Tech Mono';}
+.tbl-wrap tbody tr{border-bottom:1px solid var(--b1);transition:background .15s;}
+.tbl-wrap tbody tr:hover{background:rgba(255,255,255,0.02);}
+.tbl-wrap tbody tr:last-child{border-bottom:none;}
+.tbl-wrap td{padding:10px 14px;font-size:13px;font-weight:600;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;}
+.badge-green{background:var(--green2);color:var(--green);}
+.badge-red{background:var(--red2);color:var(--red);}
+.badge-yellow{background:var(--yellow2);color:var(--yellow);}
+.badge-blue{background:var(--blue2);color:var(--blue);}
+.badge-gray{background:var(--b2);color:var(--g);}
+
+/* CARDS GRID */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;}
+.staff-card{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:16px;transition:all .2s;cursor:pointer;position:relative;}
+.staff-card:hover{background:var(--s2);border-color:var(--b2);transform:translateY(-2px);}
+.sc-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.sc-av{width:44px;height:44px;border-radius:50%;background:var(--b2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.sc-name{font-family:'Bebas Neue';font-size:17px;letter-spacing:1px;line-height:1;}
+.sc-role{font-size:10px;color:var(--g);margin-top:2px;letter-spacing:1px;}
+.sc-id{font-size:9px;color:var(--b3);font-family:'Share Tech Mono';}
+.sc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;}
+.sc-stat{background:var(--s2);border-radius:4px;padding:6px;text-align:center;}
+.sc-stat-v{font-family:'Bebas Neue';font-size:18px;color:#fff;line-height:1;}
+.sc-stat-l{font-size:8px;color:var(--g);text-transform:uppercase;letter-spacing:1px;}
+.sc-actions{display:flex;gap:6px;}
+.sc-online{position:absolute;top:12px;right:12px;width:8px;height:8px;border-radius:50%;background:var(--green);}
+
+/* FORM */
+.form-box{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:20px;margin-bottom:14px;}
+.fb-title{font-family:'Bebas Neue';font-size:15px;letter-spacing:3px;color:rgba(255,255,255,0.5);margin-bottom:14px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fg{margin-bottom:10px;}
+.fl{display:block;font-size:9px;font-weight:700;letter-spacing:2px;color:var(--g);text-transform:uppercase;margin-bottom:5px;font-family:'Share Tech Mono';}
+.fi,.fs{width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:6px;color:#fff;padding:9px 12px;font-family:'Rajdhani';font-size:13px;font-weight:600;outline:none;transition:border-color .2s;}
+.fi:focus,.fs:focus{border-color:var(--blue);}
+.fs option{background:var(--bg);}
+textarea.fi{resize:vertical;min-height:70px;}
+
+/* ATTENDANCE */
+.att-date-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.att-date-inp{background:var(--s2);border:1px solid var(--b2);border-radius:6px;color:#fff;padding:8px 14px;font-family:'Rajdhani';font-size:13px;font-weight:600;outline:none;}
+.att-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:6px;margin-bottom:6px;transition:all .2s;}
+.att-row:hover{background:var(--s2);}
+.att-av{font-size:22px;flex-shrink:0;}
+.att-name{flex:1;font-size:13px;font-weight:700;}
+.att-role{font-size:10px;color:var(--g);}
+.att-btns{display:flex;gap:6px;flex-shrink:0;}
+.att-btn{font-size:10px;font-weight:700;padding:5px 14px;border:none;border-radius:4px;cursor:pointer;font-family:'Rajdhani';letter-spacing:1px;transition:all .2s;}
+.att-p{background:var(--green2);color:var(--green);border:1px solid rgba(34,197,94,.3);}
+.att-p.sel{background:var(--green);color:#000;}
+.att-a{background:var(--red2);color:var(--red);border:1px solid rgba(239,68,68,.3);}
+.att-a.sel{background:var(--red);color:#fff;}
+.att-h{background:var(--yellow2);color:var(--yellow);border:1px solid rgba(245,158,11,.3);}
+.att-h.sel{background:var(--yellow);color:#000;}
+
+/* SALARY */
+.sal-card{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:14px;margin-bottom:8px;}
+.sal-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.sal-av{font-size:20px;}
+.sal-name{font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;}
+.sal-role{font-size:10px;color:var(--g);}
+.sal-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;}
+.sal-item{background:var(--s2);border-radius:4px;padding:8px;text-align:center;}
+.sal-val{font-family:'Bebas Neue';font-size:20px;color:#fff;line-height:1;}
+.sal-lbl{font-size:8px;color:var(--g);text-transform:uppercase;letter-spacing:1px;}
+.sal-actions{display:flex;gap:8px;align-items:center;}
+.sal-inp{background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:#fff;padding:6px 10px;font-family:'Rajdhani';font-size:12px;font-weight:600;outline:none;width:120px;}
+
+/* REPORT */
+.report-box{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:20px;margin-bottom:14px;}
+.rb-title{font-family:'Bebas Neue';font-size:18px;letter-spacing:3px;color:#fff;margin-bottom:4px;}
+.rb-sub{font-size:10px;color:var(--g);font-family:'Share Tech Mono';margin-bottom:14px;}
+.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.rg-item{background:var(--s2);border-radius:6px;padding:12px;text-align:center;}
+.rg-val{font-family:'Bebas Neue';font-size:28px;color:#fff;line-height:1;}
+.rg-lbl{font-size:9px;color:var(--g);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.progress-bar{height:6px;background:var(--b2);border-radius:3px;margin-top:4px;overflow:hidden;}
+.pb-fill{height:100%;border-radius:3px;transition:width .8s;}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(4px);}
+.modal-ov.open{display:flex;}
+.modal-box{background:var(--s1);border:1px solid var(--b1);border-radius:10px;width:100%;max-width:560px;margin:auto;}
+.modal-hd{padding:16px 20px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--s1);border-radius:10px 10px 0 0;}
+.modal-hd h3{font-family:'Bebas Neue';font-size:18px;letter-spacing:3px;color:#fff;}
+.modal-cl{background:none;border:none;color:var(--g);font-size:20px;cursor:pointer;border-radius:4px;transition:color .2s;}.modal-cl:hover{color:#fff;}
+.modal-bd{padding:20px;}
+.modal-ft{padding:14px 20px;border-top:1px solid var(--b1);display:flex;gap:8px;justify-content:flex-end;}
+
+/* NOTIF */
+.notif{position:fixed;bottom:20px;right:20px;background:var(--s1);border:1px solid var(--b1);border-left:3px solid var(--blue);border-radius:6px;padding:10px 16px;font-size:12px;font-weight:700;letter-spacing:.5px;z-index:9999;transform:translateY(100px);transition:transform .3s;font-family:'Rajdhani';color:#fff;max-width:300px;}
+.notif.show{transform:translateY(0);}
+.notif.err{border-left-color:var(--red);}.notif.ok{border-left-color:var(--green);}
+
+/* PROFILE VIEW */
+.profile-header{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:24px;display:flex;gap:20px;align-items:flex-start;margin-bottom:14px;}
+.ph-av{width:70px;height:70px;border-radius:50%;background:var(--b2);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;}
+.ph-info{flex:1;}
+.ph-name{font-family:'Bebas Neue';font-size:28px;letter-spacing:2px;margin-bottom:2px;}
+.ph-role{font-size:12px;color:var(--g);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.ph-tags{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* TABS */
+.tabs{display:flex;gap:2px;margin-bottom:16px;background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:4px;}
+.tab{flex:1;text-align:center;padding:7px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:4px;color:var(--g);transition:all .2s;}
+.tab.on{background:var(--blue);color:#fff;}
+
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .form-grid{grid-template-columns:1fr;}
+  .sal-row{grid-template-columns:1fr 1fr;}
+  .cards-grid{grid-template-columns:1fr;}
+  .report-grid{grid-template-columns:1fr 1fr;}
+  .steps-grid{grid-template-columns:1fr 1fr;}
+  .bottom-nav{display:flex!important;}
+  .main{padding-bottom:70px;}
+}
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--s1);border-top:1px solid var(--b1);height:60px;}
+.bottom-nav{display:none;flex;}
+.bn-i{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border-top:2px solid transparent;}
+.bn-i.on{border-top-color:var(--blue);}
+.bn-ic{font-size:18px;}
+.bn-lb{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--g);font-family:'Share Tech Mono';}
+.bn-i.on .bn-lb{color:var(--blue);}
+</style>
+</head>
+<body>
+
+<div class="notif" id="notif"></div>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-view">
+  <div class="login-card">
+    <div class="lc-logo">
+      <div class="lc-brand">RRTM</div>
+      <div class="lc-sub">Staff Management System</div>
+    </div>
+    <div class="lc-err" id="lc-err">⚠ Wrong password</div>
+    <label class="fl" style="padding:0 0 5px">Password</label>
+    <input type="password" class="lc-input" id="l-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="lc-btn" onclick="doLogin()">LOGIN →</button>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app-view">
+
+  <!-- TOP NAV -->
+  <div class="topnav">
+    <div class="tn-logo">RR<span>TM</span></div>
+    <div class="tn-search"><input type="text" placeholder="Staff search karo..." oninput="searchStaff(this.value)"/></div>
+    <div class="tn-right">
+      <div class="tn-date" id="tn-date"></div>
+      <div class="tn-user">👤 Admin</div>
+      <button class="tn-logout" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="app-body">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-sec">// Main</div>
+      <div class="sb-item on" onclick="goPage('dashboard',this)"><span class="sb-ic">📊</span>Dashboard</div>
+      <div class="sb-item" onclick="goPage('staff',this)"><span class="sb-ic">👥</span>Staff<span class="sb-badge" id="sb-staff-ct">0</span></div>
+      <div class="sb-sec">// Daily</div>
+      <div class="sb-item" onclick="goPage('attendance',this)"><span class="sb-ic">📋</span>Attendance</div>
+      <div class="sb-item" onclick="goPage('salary',this)"><span class="sb-ic">💰</span>Salary</div>
+      <div class="sb-sec">// Reports</div>
+      <div class="sb-item" onclick="goPage('report',this)"><span class="sb-ic">📈</span>Monthly Report</div>
+      <div class="sb-item" onclick="goPage('tasks',this)"><span class="sb-ic">✅</span>Tasks</div>
+      <div class="sb-item" onclick="goPage('notices',this)"><span class="sb-ic">📢</span>Notice Board</div>
+      <div class="sb-foot">RRTM v1.0 · 2026</div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main" id="main">
+
+      <!-- ══ DASHBOARD ══ -->
+      <div class="page on" id="pg-dashboard">
+        <div class="pg-hd">
+          <div><div class="pg-title">📊 DASHBOARD</div><div class="pg-sub" id="dash-date-sub"></div></div>
+          <button class="btn btn-blue" onclick="goPage('attendance',document.querySelectorAll('.sb-item')[3])">📋 Mark Today's Attendance</button>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card" style="--sc:var(--blue)">
+            <div class="sc-ic">👥</div>
+            <div class="sc-label">Total Staff</div>
+            <div class="sc-val" id="d-total">0</div>
+            <div class="sc-sub">Registered members</div>
+          </div>
+          <div class="stat-card" style="--sc:var(--green)">
+            <div class="sc-ic">✅</div>
+            <div class="sc-label">Today Present</div>
+            <div class="sc-val" id="d-present">0</div>
+            <div class="sc-sub" id="d-present-pct">0%</div>
+          </div>
+          <div class="stat-card" style="--sc:var(--red)">
+            <div class="sc-ic">❌</div>
+            <div class="sc-label">Today Absent</div>
+            <div class="sc-val" id="d-absent">0</div>
+            <div class="sc-sub" id="d-absent-pct">0%</div>
+          </div>
+          <div class="stat-card" style="--sc:var(--yellow)">
+            <div class="sc-ic">💰</div>
+            <div class="sc-label">This Month Pay</div>
+            <div class="sc-val" id="d-salary">₹0</div>
+            <div class="sc-sub">Total paid</div>
+          </div>
+        </div>
+
+        <!-- Today Attendance Summary -->
+        <div class="form-box">
+          <div class="fb-title">TODAY'S ATTENDANCE SUMMARY</div>
+          <div id="dash-att-list"><div style="color:var(--g);font-size:12px;font-family:Share Tech Mono">Aaj ki attendance mark nahi ki gayi. Dashboard → Mark Attendance.</div></div>
+        </div>
+
+        <!-- Recent Salary -->
+        <div class="form-box">
+          <div class="fb-title">RECENT PAYMENTS</div>
+          <div id="dash-sal-list"><div style="color:var(--g);font-size:12px;font-family:Share Tech Mono">Koi payment nahi ki gayi abhi tak.</div></div>
+        </div>
+      </div>
+
+      <!-- ══ STAFF ══ -->
+      <div class="page" id="pg-staff">
+        <div class="pg-hd">
+          <div><div class="pg-title">👥 STAFF MANAGEMENT</div><div class="pg-sub" id="staff-count-sub">0 members registered</div></div>
+          <button class="btn btn-blue" onclick="openAddStaff()">+ Add Staff</button>
+        </div>
+
+        <!-- Search filter -->
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <select class="fs" id="filter-dept" style="width:auto" onchange="renderStaffCards()">
+            <option value="">All Departments</option>
+            <option>Management</option>
+            <option>Operations</option>
+            <option>Sales</option>
+            <option>Support</option>
+            <option>Technical</option>
+            <option>Other</option>
+          </select>
+          <select class="fs" id="filter-status" style="width:auto" onchange="renderStaffCards()">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <div class="cards-grid" id="staff-cards"></div>
+      </div>
+
+      <!-- ══ ATTENDANCE ══ -->
+      <div class="page" id="pg-attendance">
+        <div class="pg-hd">
+          <div><div class="pg-title">📋 ATTENDANCE</div><div class="pg-sub">Daily attendance mark karo</div></div>
+          <button class="btn btn-green" onclick="saveAttendance()">💾 Save Attendance</button>
+        </div>
+
+        <div class="att-date-row">
+          <div style="font-size:12px;color:var(--g);font-family:'Share Tech Mono'">Date:</div>
+          <input type="date" class="att-date-inp" id="att-date"/>
+          <select class="fs" id="att-shift" style="width:auto">
+            <option>Morning Shift</option>
+            <option>Evening Shift</option>
+            <option>Night Shift</option>
+            <option>Full Day</option>
+          </select>
+        </div>
+
+        <!-- Quick mark all -->
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button class="btn btn-green btn-sm" onclick="markAll('P')">✅ Mark All Present</button>
+          <button class="btn btn-red btn-sm" onclick="markAll('A')">❌ Mark All Absent</button>
+        </div>
+
+        <div id="att-list"></div>
+      </div>
+
+      <!-- ══ SALARY ══ -->
+      <div class="page" id="pg-salary">
+        <div class="pg-hd">
+          <div><div class="pg-title">💰 SALARY MANAGEMENT</div><div class="pg-sub">Payments track karo</div></div>
+          <select class="fs" id="sal-month" style="width:auto" onchange="renderSalary()">
+            <option>January 2026</option><option>February 2026</option>
+            <option selected>March 2026</option><option>April 2026</option>
+            <option>May 2026</option><option>June 2026</option>
+          </select>
+        </div>
+
+        <!-- Summary -->
+        <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+          <div class="stat-card" style="--sc:var(--blue)">
+            <div class="sc-label">Total Payable</div>
+            <div class="sc-val" id="sal-total">₹0</div>
+          </div>
+          <div class="stat-card" style="--sc:var(--green)">
+            <div class="sc-label">Paid</div>
+            <div class="sc-val" id="sal-paid">₹0</div>
+          </div>
+          <div class="stat-card" style="--sc:var(--red)">
+            <div class="sc-label">Pending</div>
+            <div class="sc-val" id="sal-pending">₹0</div>
+          </div>
+        </div>
+
+        <div id="salary-list"></div>
+      </div>
+
+      <!-- ══ MONTHLY REPORT ══ -->
+      <div class="page" id="pg-report">
+        <div class="pg-hd">
+          <div><div class="pg-title">📈 MONTHLY REPORT</div><div class="pg-sub">Complete staff report</div></div>
+          <div style="display:flex;gap:8px">
+            <select class="fs" id="rpt-month" style="width:auto" onchange="renderReport()">
+              <option>January 2026</option><option>February 2026</option>
+              <option selected>March 2026</option>
+            </select>
+            <button class="btn btn-out" onclick="printReport()">🖨 Print</button>
+          </div>
+        </div>
+        <div id="report-content"></div>
+      </div>
+
+      <!-- ══ TASKS ══ -->
+      <div class="page" id="pg-tasks">
+        <div class="pg-hd">
+          <div><div class="pg-title">✅ TASKS</div><div class="pg-sub">Staff ko tasks assign karo</div></div>
+          <button class="btn btn-blue" onclick="openAddTask()">+ New Task</button>
+        </div>
+        <div id="tasks-list"></div>
+      </div>
+
+      <!-- ══ NOTICE BOARD ══ -->
+      <div class="page" id="pg-notices">
+        <div class="pg-hd">
+          <div><div class="pg-title">📢 NOTICE BOARD</div><div class="pg-sub">Announcements</div></div>
+          <button class="btn btn-blue" onclick="openAddNotice()">+ Post Notice</button>
+        </div>
+        <div id="notices-list"></div>
+      </div>
+
+    </div><!-- end main -->
+  </div><!-- end app-body -->
+
+  <!-- BOTTOM NAV MOBILE -->
+  <div class="bottom-nav" id="bnav" style="display:none">
+    <div class="bn-i on" id="bn-dashboard" onclick="bnGo('dashboard','bn-dashboard')"><div class="bn-ic">📊</div><div class="bn-lb">Home</div></div>
+    <div class="bn-i" id="bn-staff" onclick="bnGo('staff','bn-staff')"><div class="bn-ic">👥</div><div class="bn-lb">Staff</div></div>
+    <div class="bn-i" id="bn-attendance" onclick="bnGo('attendance','bn-attendance')"><div class="bn-ic">📋</div><div class="bn-lb">Attendance</div></div>
+    <div class="bn-i" id="bn-salary" onclick="bnGo('salary','bn-salary')"><div class="bn-ic">💰</div><div class="bn-lb">Salary</div></div>
+    <div class="bn-i" id="bn-report" onclick="bnGo('report','bn-report')"><div class="bn-ic">📈</div><div class="bn-lb">Report</div></div>
+  </div>
+
+</div><!-- end app-view -->
+
+<!-- ══ ADD STAFF MODAL ══ -->
+<div class="modal-ov" id="modal-staff">
+<div class="modal-box">
+  <div class="modal-hd"><h3 id="staff-modal-title">ADD STAFF</h3><button class="modal-cl" onclick="closeModal('modal-staff')">✕</button></div>
+  <div class="modal-bd">
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Full Name *</label><input type="text" class="fi" id="sf-name" placeholder="Rahul Kumar"/></div>
+      <div class="fg"><label class="fl">Employee ID *</label><input type="text" class="fi" id="sf-id" placeholder="RRTM-001"/></div>
+    </div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Role / Designation *</label><input type="text" class="fi" id="sf-role" placeholder="Manager"/></div>
+      <div class="fg"><label class="fl">Department</label>
+        <select class="fs" id="sf-dept">
+          <option>Management</option><option>Operations</option>
+          <option>Sales</option><option>Support</option>
+          <option>Technical</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Phone</label><input type="tel" class="fi" id="sf-phone" placeholder="9876543210"/></div>
+      <div class="fg"><label class="fl">Email</label><input type="email" class="fi" id="sf-email" placeholder="rahul@email.com"/></div>
+    </div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Monthly Salary ₹</label><input type="number" class="fi" id="sf-salary" placeholder="15000"/></div>
+      <div class="fg"><label class="fl">Join Date</label><input type="date" class="fi" id="sf-join"/></div>
+    </div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Avatar Emoji</label><input type="text" class="fi" id="sf-av" placeholder="👤" maxlength="4"/></div>
+      <div class="fg"><label class="fl">Status</label>
+        <select class="fs" id="sf-status"><option value="active">Active</option><option value="inactive">Inactive</option></select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Address</label><input type="text" class="fi" id="sf-addr" placeholder="City, State"/></div>
+    <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="sf-notes" placeholder="Koi additional info..."></textarea></div>
+    <input type="hidden" id="sf-edit-id"/>
+  </div>
+  <div class="modal-ft">
+    <button class="btn btn-out" onclick="closeModal('modal-staff')">Cancel</button>
+    <button class="btn btn-blue" onclick="saveStaff()">Save</button>
+  </div>
+</div></div>
+
+<!-- ══ TASK MODAL ══ -->
+<div class="modal-ov" id="modal-task">
+<div class="modal-box">
+  <div class="modal-hd"><h3>ASSIGN TASK</h3><button class="modal-cl" onclick="closeModal('modal-task')">✕</button></div>
+  <div class="modal-bd">
+    <div class="fg"><label class="fl">Task Title *</label><input type="text" class="fi" id="tk-title" placeholder="Report submit karo"/></div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Assigned To</label><select class="fs" id="tk-staff"></select></div>
+      <div class="fg"><label class="fl">Priority</label>
+        <select class="fs" id="tk-priority">
+          <option value="high">🔴 High</option>
+          <option value="medium">🟡 Medium</option>
+          <option value="low">🟢 Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Due Date</label><input type="date" class="fi" id="tk-due"/></div>
+      <div class="fg"><label class="fl">Status</label>
+        <select class="fs" id="tk-status">
+          <option value="pending">⏳ Pending</option>
+          <option value="inprogress">🔄 In Progress</option>
+          <option value="done">✅ Done</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Description</label><textarea class="fi" id="tk-desc" placeholder="Task detail..."></textarea></div>
+  </div>
+  <div class="modal-ft">
+    <button class="btn btn-out" onclick="closeModal('modal-task')">Cancel</button>
+    <button class="btn btn-blue" onclick="saveTask()">Assign Task</button>
+  </div>
+</div></div>
+
+<!-- NOTICE MODAL -->
+<div class="modal-ov" id="modal-notice">
+<div class="modal-box">
+  <div class="modal-hd"><h3>POST NOTICE</h3><button class="modal-cl" onclick="closeModal('modal-notice')">✕</button></div>
+  <div class="modal-bd">
+    <div class="fg"><label class="fl">Title *</label><input type="text" class="fi" id="nc-title" placeholder="Important Notice"/></div>
+    <div class="fg"><label class="fl">Message</label><textarea class="fi" id="nc-msg" placeholder="Notice content..." style="min-height:100px"></textarea></div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Type</label>
+        <select class="fs" id="nc-type">
+          <option value="info">ℹ Info</option>
+          <option value="warning">⚠ Warning</option>
+          <option value="urgent">🚨 Urgent</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="nc-date"/></div>
+    </div>
+  </div>
+  <div class="modal-ft">
+    <button class="btn btn-out" onclick="closeModal('modal-notice')">Cancel</button>
+    <button class="btn btn-blue" onclick="saveNotice()">Post</button>
+  </div>
+</div></div>
+
+<!-- STAFF PROFILE MODAL -->
+<div class="modal-ov" id="modal-profile">
+<div class="modal-box" style="max-width:600px">
+  <div class="modal-hd"><h3 id="profile-title">STAFF PROFILE</h3><button class="modal-cl" onclick="closeModal('modal-profile')">✕</button></div>
+  <div class="modal-bd" id="profile-content"></div>
+</div></div>
+
+<script>
+// ══ DATA ══
+const ADMIN = {user:'admin', pass:'RRTM1920'};
+
+// Default staff
+const DEFAULT_STAFF = [
+  {id:'RRTM-001',name:'Rahul Kumar',role:'Manager',dept:'Management',phone:'9876543210',email:'rahul@rrtm.com',salary:25000,join:'2025-01-15',av:'👨‍💼',status:'active',addr:'Delhi',notes:'Senior manager'},
+  {id:'RRTM-002',name:'Priya Sharma',role:'Sales Executive',dept:'Sales',phone:'9812345678',email:'priya@rrtm.com',salary:18000,join:'2025-03-01',av:'👩‍💼',status:'active',addr:'Mumbai',notes:''},
+  {id:'RRTM-003',name:'Amit Singh',role:'Support Staff',dept:'Support',phone:'9898989898',email:'amit@rrtm.com',salary:14000,join:'2025-06-01',av:'👨‍🔧',status:'active',addr:'Pune',notes:''},
+];
+
+// Load from localStorage or use defaults
+function loadData(){
+  try{
+    const s=localStorage.getItem('rrtm_staff');
+    staff = s ? JSON.parse(s) : [...DEFAULT_STAFF];
+  }catch(e){staff=[...DEFAULT_STAFF];}
+  try{
+    const a=localStorage.getItem('rrtm_attendance');
+    attendance = a ? JSON.parse(a) : {};
+  }catch(e){attendance={};}
+  try{
+    const p=localStorage.getItem('rrtm_payments');
+    payments = p ? JSON.parse(p) : [];
+  }catch(e){payments=[];}
+  try{
+    const t=localStorage.getItem('rrtm_tasks');
+    tasks = t ? JSON.parse(t) : [];
+  }catch(e){tasks=[];}
+  try{
+    const n=localStorage.getItem('rrtm_notices');
+    notices = n ? JSON.parse(n) : [];
+  }catch(e){notices=[];}
+}
+
+// Save all data to localStorage
+function saveData(){
+  try{
+    localStorage.setItem('rrtm_staff', JSON.stringify(staff));
+    localStorage.setItem('rrtm_attendance', JSON.stringify(attendance));
+    localStorage.setItem('rrtm_payments', JSON.stringify(payments));
+    localStorage.setItem('rrtm_tasks', JSON.stringify(tasks));
+    localStorage.setItem('rrtm_notices', JSON.stringify(notices));
+  }catch(e){console.log('Save error:',e);}
+}
+
+let staff = [...DEFAULT_STAFF];
+let attendance = {};
+let payments = [];
+let tasks = [];
+let notices = [];
+let currentAttendance = {};
+
+// Load data immediately
+loadData();
+
+// ══ LOGIN ══
+function doLogin(){
+  const p=$('l-pass').value.trim();
+  if(p===ADMIN.pass){
+    $('login-view').style.display='none';
+    $('app-view').style.display='flex';
+    $('app-view').classList.add('show');
+    initApp();
+  } else {
+    $('lc-err').style.display='block';
+  }
+}
+function doLogout(){
+  $('app-view').style.display='none';
+  $('login-view').style.display='flex';
+  $('l-pass').value='';
+}
+
+// ══ INIT ══
+function initApp(){
+  const today = new Date();
+  const ds = today.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  $('tn-date').textContent = ds;
+  $('dash-date-sub').textContent = ds;
+  $('att-date').value = today.toISOString().split('T')[0];
+  $('sf-join').valueAsDate = today;
+  $('tk-due').valueAsDate = today;
+  $('nc-date').valueAsDate = today;
+  renderDashboard();
+  renderStaffCards();
+  renderAttendance();
+  renderSalary();
+  renderReport();
+  renderTasks();
+  renderNotices();
+  // Mobile bottom nav
+  if(window.innerWidth<=768)$('bnav').style.display='flex';
+}
+
+// ══ NAVIGATION ══
+function goPage(id, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('on'));
+  $('pg-'+id).classList.add('on');
+  if(el)el.classList.add('on');
+  if(id==='dashboard')renderDashboard();
+  if(id==='attendance')renderAttendance();
+  if(id==='salary')renderSalary();
+  if(id==='report')renderReport();
+  if(id==='tasks')renderTasks();
+  if(id==='notices')renderNotices();
+  // sync bottom nav
+  document.querySelectorAll('.bn-i').forEach(b=>b.classList.remove('on'));
+  const bnEl=$('bn-'+id);
+  if(bnEl)bnEl.classList.add('on');
+}
+function bnGo(id,btnId){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('on'));
+  document.querySelectorAll('.bn-i').forEach(b=>b.classList.remove('on'));
+  $('pg-'+id).classList.add('on');
+  $('bn-'+id).classList.add('on');
+  const sideEl=document.querySelector('.sb-item[onclick*="\''+id+'\'"]');
+  if(sideEl)sideEl.classList.add('on');
+  if(id==='dashboard')renderDashboard();
+  if(id==='attendance')renderAttendance();
+  if(id==='salary')renderSalary();
+  if(id==='report')renderReport();
+}
+
+// ══ DASHBOARD ══
+function renderDashboard(){
+  const today = new Date().toISOString().split('T')[0];
+  const todayAtt = attendance[today] || {};
+  const present = Object.values(todayAtt).filter(v=>v==='P').length;
+  const absent = Object.values(todayAtt).filter(v=>v==='A').length;
+  const total = staff.length;
+  $('d-total').textContent = total;
+  $('d-present').textContent = present;
+  $('d-absent').textContent = absent;
+  $('d-present-pct').textContent = total?Math.round(present/total*100)+'% attendance':'No data';
+  $('d-absent-pct').textContent = total?Math.round(absent/total*100)+'% absent':'';
+  const totalPaid = payments.reduce((s,p)=>s+p.amount,0);
+  $('d-salary').textContent = '₹'+totalPaid.toLocaleString();
+  $('sb-staff-ct').textContent = total;
+  $('staff-count-sub').textContent = total+' members registered';
+
+  // Today att list
+  if(Object.keys(todayAtt).length){
+    $('dash-att-list').innerHTML = staff.map(s=>{
+      const st = todayAtt[s.id] || '-';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--b1)">
+        <span style="font-size:18px">${s.av}</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:700">${s.name}</div><div style="font-size:10px;color:var(--g)">${s.role}</div></div>
+        <span class="badge ${st==='P'?'badge-green':st==='A'?'badge-red':st==='H'?'badge-yellow':'badge-gray'}">${st==='P'?'Present':st==='A'?'Absent':st==='H'?'Half Day':'N/A'}</span>
+      </div>`;
+    }).join('');
+  } else {
+    $('dash-att-list').innerHTML = '<div style="color:var(--g);font-size:12px;font-family:Share Tech Mono;padding:10px 0">Aaj ki attendance mark nahi ki gayi.</div>';
+  }
+
+  // Recent payments
+  const recent = payments.slice(-5).reverse();
+  if(recent.length){
+    $('dash-sal-list').innerHTML = recent.map(p=>{
+      const s = staff.find(x=>x.id===p.staffId);
+      return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--b1)">
+        <span style="font-size:18px">${s?.av||'👤'}</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:700">${s?.name||p.staffId}</div><div style="font-size:10px;color:var(--g)">${p.note||p.month}</div></div>
+        <span style="font-family:'Bebas Neue';font-size:18px;color:var(--green)">+₹${p.amount.toLocaleString()}</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ══ STAFF ══
+function renderStaffCards(searchQ=''){
+  const dept = $('filter-dept').value;
+  const status = $('filter-status').value;
+  let list = staff.filter(s=>{
+    const matchQ = !searchQ || (s.name+s.role+s.id).toLowerCase().includes(searchQ.toLowerCase());
+    const matchD = !dept || s.dept===dept;
+    const matchS = !status || s.status===status;
+    return matchQ && matchD && matchS;
+  });
+  $('staff-cards').innerHTML = list.map(s=>{
+    const today = new Date().toISOString().split('T')[0];
+    const todayStatus = attendance[today]?.[s.id] || '-';
+    const totalPaid = payments.filter(p=>p.staffId===s.id).reduce((sum,p)=>sum+p.amount,0);
+    const daysPresent = Object.values(attendance).filter(day=>day[s.id]==='P').length;
+    return `<div class="staff-card" onclick="viewProfile('${s.id}')">
+      <div class="sc-av" style="background:var(--b2)">${s.av}</div>
+      <div style="position:absolute;top:12px;right:12px">
+        <span class="badge ${s.status==='active'?'badge-green':'badge-gray'}">${s.status}</span>
+      </div>
+      <div style="margin-top:10px">
+        <div style="font-family:'Bebas Neue';font-size:18px;letter-spacing:1px">${s.name}</div>
+        <div style="font-size:10px;color:var(--g);margin-bottom:4px">${s.role} · ${s.dept}</div>
+        <div style="font-size:9px;color:var(--b3);font-family:'Share Tech Mono'">${s.id}</div>
+      </div>
+      <div class="sc-stats" style="margin-top:10px">
+        <div class="sc-stat"><div class="sc-stat-v">${daysPresent}</div><div class="sc-stat-l">Present</div></div>
+        <div class="sc-stat"><div class="sc-stat-v" style="color:var(--green)">₹${(totalPaid/1000).toFixed(0)}k</div><div class="sc-stat-l">Paid</div></div>
+        <div class="sc-stat"><div class="sc-stat-v">${todayStatus==='P'?'✅':todayStatus==='A'?'❌':todayStatus==='H'?'½':'—'}</div><div class="sc-stat-l">Today</div></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px" onclick="event.stopPropagation()">
+        <button class="btn btn-out btn-sm" onclick="openEditStaff('${s.id}')">✏ Edit</button>
+        <button class="btn btn-red btn-sm" onclick="deleteStaff('${s.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('') || '<div style="color:var(--g);font-size:12px;font-family:Share Tech Mono;grid-column:1/-1;text-align:center;padding:40px">Koi staff nahi mila.</div>';
+  $('sb-staff-ct').textContent = staff.length;
+  $('staff-count-sub').textContent = staff.length+' members registered';
+}
+function searchStaff(q){renderStaffCards(q);}
+
+function openAddStaff(){
+  $('staff-modal-title').textContent = 'ADD STAFF';
+  $('sf-edit-id').value = '';
+  ['sf-name','sf-id','sf-role','sf-phone','sf-email','sf-addr','sf-notes'].forEach(id=>$(id).value='');
+  $('sf-salary').value = '';
+  $('sf-av').value = '👤';
+  $('sf-status').value = 'active';
+  $('sf-join').value = new Date().toISOString().split('T')[0];
+  openModal('modal-staff');
+}
+function openEditStaff(id){
+  const s=staff.find(x=>x.id===id);if(!s)return;
+  $('staff-modal-title').textContent = 'EDIT STAFF';
+  $('sf-name').value=s.name;$('sf-id').value=s.id;$('sf-role').value=s.role;
+  $('sf-dept').value=s.dept;$('sf-phone').value=s.phone||'';$('sf-email').value=s.email||'';
+  $('sf-salary').value=s.salary||0;$('sf-join').value=s.join||'';
+  $('sf-av').value=s.av||'👤';$('sf-status').value=s.status;
+  $('sf-addr').value=s.addr||'';$('sf-notes').value=s.notes||'';
+  $('sf-edit-id').value=id;
+  openModal('modal-staff');
+}
+function saveStaff(){
+  const name=$('sf-name').value.trim(), id=$('sf-id').value.trim().toUpperCase();
+  if(!name||!id){notif('Name aur ID zaroori hai!','err');return;}
+  const editId=$('sf-edit-id').value;
+  if(!editId && staff.find(x=>x.id===id)){notif('ID already exists!','err');return;}
+  const data={id,name,role:$('sf-role').value||'Staff',dept:$('sf-dept').value,phone:$('sf-phone').value,email:$('sf-email').value,salary:parseInt($('sf-salary').value)||0,join:$('sf-join').value,av:$('sf-av').value||'👤',status:$('sf-status').value,addr:$('sf-addr').value,notes:$('sf-notes').value};
+  if(editId){const idx=staff.findIndex(x=>x.id===editId);if(idx>=0)staff[idx]=data;}
+  else staff.push(data);
+  closeModal('modal-staff');renderStaffCards();renderDashboard();renderAttendance();renderSalary();
+  saveData();
+  notif(name+(editId?' updated!':' added!'),'ok');
+}
+function deleteStaff(id){
+  const s=staff.find(x=>x.id===id);
+  if(confirm('Delete '+s?.name+'? Yeh action undo nahi hogi!')){
+    staff=staff.filter(x=>x.id!==id);
+    renderStaffCards();renderDashboard();renderAttendance();renderSalary();
+    saveData();
+    notif('🗑 '+s.name+' removed.');
+  }
+}
+
+// ══ PROFILE ══
+function viewProfile(id){
+  const s=staff.find(x=>x.id===id);if(!s)return;
+  $('profile-title').textContent=s.name.toUpperCase();
+
+  const now=new Date();
+  const curMonth=now.getMonth();
+  const curYear=now.getFullYear();
+
+  function buildProfile(month, year){
+    const daysPresent=Object.values(attendance).filter(day=>day[id]==='P').length;
+    const daysAbsent=Object.values(attendance).filter(day=>day[id]==='A').length;
+    const daysHalf=Object.values(attendance).filter(day=>day[id]==='H').length;
+    const totalPaid=payments.filter(p=>p.staffId===id).reduce((sum,p)=>sum+p.amount,0);
+    const pending=Math.max(0,(s.salary||0)-totalPaid);
+    const attPct=daysPresent+daysAbsent>0?Math.round(daysPresent/(daysPresent+daysAbsent+daysHalf)*100):0;
+
+    // Build month calendar
+    const daysInMonth=new Date(year,month+1,0).getDate();
+    const firstDay=new Date(year,month,1).getDay();
+    const monthName=new Date(year,month,1).toLocaleString('en-IN',{month:'long',year:'numeric'});
+    const monthKey=String(year)+'-'+String(month+1).padStart(2,'0');
+
+    let calDays='';
+    // Empty cells for first day
+    for(let i=0;i<firstDay;i++) calDays+=`<div></div>`;
+    for(let d=1;d<=daysInMonth;d++){
+      const dateKey=monthKey+'-'+String(d).padStart(2,'0');
+      const st=attendance[dateKey]?.[id];
+      const isToday=dateKey===now.toISOString().split('T')[0];
+      const color=st==='P'?'var(--green)':st==='A'?'var(--red)':st==='H'?'var(--yellow)':'var(--b2)';
+      const textColor=st?'#000':isToday?'#fff':'var(--g)';
+      calDays+=`<div onclick="quickAttMark('${id}','${dateKey}')" style="
+        width:32px;height:32px;border-radius:50%;background:${color};
+        display:flex;align-items:center;justify-content:center;
+        font-size:11px;font-weight:700;cursor:pointer;
+        border:${isToday?'2px solid #fff':'none'};
+        color:${st?'#000':isToday?'#fff':'var(--g)'};
+        transition:all .15s;
+      " title="${dateKey}">${d}</div>`;
+    }
+
+    $('profile-content').innerHTML=`
+      <!-- Header -->
+      <div style="display:flex;gap:14px;align-items:center;padding:4px 0 16px;border-bottom:1px solid var(--b1);margin-bottom:14px">
+        <div style="width:54px;height:54px;border-radius:50%;background:var(--b2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${s.av}</div>
+        <div>
+          <div style="font-family:'Bebas Neue';font-size:22px;letter-spacing:2px">${s.name}</div>
+          <div style="font-size:11px;color:var(--g)">${s.role} · ${s.dept}</div>
+          <div style="display:flex;gap:5px;margin-top:4px">
+            <span class="badge ${s.status==='active'?'badge-green':'badge-gray'}">${s.status}</span>
+            <span class="badge badge-blue">${s.id}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">
+        <div style="background:var(--s2);border-radius:6px;padding:10px;text-align:center;border-top:3px solid var(--green)">
+          <div style="font-family:'Bebas Neue';font-size:28px;color:var(--green)">${daysPresent}</div>
+          <div style="font-size:9px;color:var(--g)">Present</div>
+        </div>
+        <div style="background:var(--s2);border-radius:6px;padding:10px;text-align:center;border-top:3px solid var(--red)">
+          <div style="font-family:'Bebas Neue';font-size:28px;color:var(--red)">${daysAbsent}</div>
+          <div style="font-size:9px;color:var(--g)">Absent</div>
+        </div>
+        <div style="background:var(--s2);border-radius:6px;padding:10px;text-align:center;border-top:3px solid var(--yellow)">
+          <div style="font-family:'Bebas Neue';font-size:28px;color:var(--yellow)">${daysHalf}</div>
+          <div style="font-size:9px;color:var(--g)">Half Day</div>
+        </div>
+        <div style="background:var(--s2);border-radius:6px;padding:10px;text-align:center;border-top:3px solid var(--blue)">
+          <div style="font-family:'Bebas Neue';font-size:28px;color:var(--blue)">${attPct}%</div>
+          <div style="font-size:9px;color:var(--g)">Attendance</div>
+        </div>
+      </div>
+
+      <!-- Salary Row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="background:var(--s2);border-radius:6px;padding:10px;display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-size:9px;color:var(--g)">Total Paid</div><div style="font-family:'Bebas Neue';font-size:22px;color:var(--green)">₹${totalPaid.toLocaleString()}</div></div>
+          <div><div style="font-size:9px;color:var(--g)">Pending</div><div style="font-family:'Bebas Neue';font-size:22px;color:var(--red)">₹${pending.toLocaleString()}</div></div>
+        </div>
+        <div style="background:var(--s2);border-radius:6px;padding:10px">
+          <div style="font-size:9px;color:var(--g);margin-bottom:4px">Quick Attendance Today</div>
+          <div style="display:flex;gap:5px">
+            <button onclick="quickTodayAtt('${id}','P')" style="flex:1;padding:5px;background:var(--green2);color:var(--green);border:1px solid rgba(34,197,94,.3);border-radius:4px;font-family:'Rajdhani';font-size:10px;font-weight:700;cursor:pointer">✅ P</button>
+            <button onclick="quickTodayAtt('${id}','H')" style="flex:1;padding:5px;background:var(--yellow2);color:var(--yellow);border:1px solid rgba(245,158,11,.3);border-radius:4px;font-family:'Rajdhani';font-size:10px;font-weight:700;cursor:pointer">½ H</button>
+            <button onclick="quickTodayAtt('${id}','A')" style="flex:1;padding:5px;background:var(--red2);color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:4px;font-family:'Rajdhani';font-size:10px;font-weight:700;cursor:pointer">❌ A</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calendar -->
+      <div style="background:var(--s2);border-radius:8px;padding:14px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <button onclick="changeProfileMonth(${month===0?11:month-1},${month===0?year-1:year},'${id}')" style="background:var(--b2);border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:14px">‹</button>
+          <div style="font-family:'Bebas Neue';font-size:15px;letter-spacing:2px">${monthName}</div>
+          <button onclick="changeProfileMonth(${month===11?0:month+1},${month===11?year+1:year},'${id}')" style="background:var(--b2);border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:14px">›</button>
+        </div>
+        <!-- Legend -->
+        <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+          <span style="font-size:9px;display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;background:var(--green);border-radius:50%;display:inline-block"></span>Present</span>
+          <span style="font-size:9px;display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;background:var(--red);border-radius:50%;display:inline-block"></span>Absent</span>
+          <span style="font-size:9px;display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;background:var(--yellow);border-radius:50%;display:inline-block"></span>Half</span>
+          <span style="font-size:9px;color:var(--g)">· Tap karo kisi din pe mark karne ke liye</span>
+        </div>
+        <!-- Day headers -->
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;text-align:center">
+          ${['S','M','T','W','T','F','S'].map(d=>`<div style="font-size:9px;color:var(--g);font-weight:700">${d}</div>`).join('')}
+        </div>
+        <!-- Days grid -->
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;justify-items:center">
+          ${calDays}
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-out" onclick="openEditStaff('${id}');closeModal('modal-profile')">✏ Edit</button>
+        <button class="btn btn-blue" onclick="quickPay('${id}')">💰 Pay Salary</button>
+      </div>`;
+
+    // Store current profile context for month navigation
+    window._profileId=id;
+    window._profileMonth=month;
+    window._profileYear=year;
+  }
+
+  buildProfile(curMonth, curYear);
+  openModal('modal-profile');
+}
+
+function changeProfileMonth(month, year, id){
+  window._profileId=id;
+  // Rebuild profile with new month
+  const s=staff.find(x=>x.id===id);if(!s)return;
+  const now=new Date();
+  const curMonth=month;
+  const curYear=year;
+
+  const daysPresent=Object.values(attendance).filter(day=>day[id]==='P').length;
+  const daysAbsent=Object.values(attendance).filter(day=>day[id]==='A').length;
+  const daysHalf=Object.values(attendance).filter(day=>day[id]==='H').length;
+  const totalPaid=payments.filter(p=>p.staffId===id).reduce((sum,p)=>sum+p.amount,0);
+  const pending=Math.max(0,(s.salary||0)-totalPaid);
+  const attPct=daysPresent+daysAbsent>0?Math.round(daysPresent/(daysPresent+daysAbsent+daysHalf)*100):0;
+
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const firstDay=new Date(year,month,1).getDay();
+  const monthName=new Date(year,month,1).toLocaleString('en-IN',{month:'long',year:'numeric'});
+  const monthKey=String(year)+'-'+String(month+1).padStart(2,'0');
+
+  let calDays='';
+  for(let i=0;i<firstDay;i++) calDays+=`<div></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const dateKey=monthKey+'-'+String(d).padStart(2,'0');
+    const st=attendance[dateKey]?.[id];
+    const isToday=dateKey===now.toISOString().split('T')[0];
+    const color=st==='P'?'var(--green)':st==='A'?'var(--red)':st==='H'?'var(--yellow)':'var(--b2)';
+    calDays+=`<div onclick="quickAttMark('${id}','${dateKey}')" style="
+      width:32px;height:32px;border-radius:50%;background:${color};
+      display:flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:700;cursor:pointer;
+      border:${isToday?'2px solid #fff':'none'};
+      color:${st?'#000':isToday?'#fff':'var(--g)'};
+      transition:all .15s;
+    " title="${dateKey}">${d}</div>`;
+  }
+
+  // Update only calendar section
+  viewProfile(id);
+  // Scroll to calendar after rebuild
+  setTimeout(()=>{
+    const cal=document.querySelector('#profile-content');
+    if(cal)cal.scrollTop=200;
+  },50);
+}
+
+function quickAttMark(staffId, dateKey){
+  const cur=attendance[dateKey]?.[staffId];
+  const next=cur==='P'?'A':cur==='A'?'H':cur==='H'?undefined:'P';
+  if(!attendance[dateKey])attendance[dateKey]={};
+  if(next===undefined){
+    delete attendance[dateKey][staffId];
+  } else {
+    attendance[dateKey][staffId]=next;
+  }
+  renderDashboard();
+  saveData();
+  // Refresh profile
+  viewProfile(staffId);
+  notif(next?'Marked '+next+' for '+dateKey:'Cleared '+dateKey,'ok');
+}
+
+function quickTodayAtt(staffId, val){
+  const today=new Date().toISOString().split('T')[0];
+  if(!attendance[today])attendance[today]={};
+  attendance[today][staffId]=val;
+  currentAttendance[staffId]=val;
+  renderDashboard();
+  saveData();
+  viewProfile(staffId);
+  const names={P:'Present',A:'Absent',H:'Half Day'};
+  notif('✅ '+names[val]+' marked for today!','ok');
+}
+
+
+// ══ ATTENDANCE ══
+function renderAttendance(){
+  const date=$('att-date').value;
+  const saved=attendance[date]||{};
+  currentAttendance={...saved};
+  $('att-list').innerHTML=staff.map(s=>`
+    <div class="att-row">
+      <div class="att-av">${s.av}</div>
+      <div style="flex:1">
+        <div class="att-name">${s.name}</div>
+        <div class="att-role">${s.role} · ${s.id}</div>
+      </div>
+      <div class="att-btns">
+        <button class="att-btn att-p ${currentAttendance[s.id]==='P'?'sel':''}" id="att-p-${s.id}" onclick="setAtt('${s.id}','P')">Present</button>
+        <button class="att-btn att-h ${currentAttendance[s.id]==='H'?'sel':''}" id="att-h-${s.id}" onclick="setAtt('${s.id}','H')">Half</button>
+        <button class="att-btn att-a ${currentAttendance[s.id]==='A'?'sel':''}" id="att-a-${s.id}" onclick="setAtt('${s.id}','A')">Absent</button>
+      </div>
+    </div>`).join('');
+}
+function setAtt(id,val){
+  currentAttendance[id]=val;
+  ['P','H','A'].forEach(v=>{
+    const el=$('att-'+v+'-'+id);
+    if(el){el.classList.remove('sel');}
+  });
+  $('att-'+val+'-'+id)?.classList.add('sel');
+}
+function markAll(val){
+  staff.forEach(s=>{setAtt(s.id,val);});
+}
+function saveAttendance(){
+  const date=$('att-date').value;
+  if(!date){notif('Date select karo!','err');return;}
+  attendance[date]={...currentAttendance};
+  renderDashboard();
+  saveData();
+  notif('✅ Attendance saved for '+date,'ok');
+}
+
+// ══ SALARY ══
+function renderSalary(){
+  const month=$('sal-month').value;
+  const monthPmts=payments.filter(p=>p.month===month);
+  const totalPaid=monthPmts.reduce((s,p)=>s+p.amount,0);
+  const totalPayable=staff.reduce((s,st)=>s+(st.salary||0),0);
+  $('sal-total').textContent='₹'+totalPayable.toLocaleString();
+  $('sal-paid').textContent='₹'+totalPaid.toLocaleString();
+  $('sal-pending').textContent='₹'+Math.max(0,totalPayable-totalPaid).toLocaleString();
+  $('salary-list').innerHTML=staff.map(s=>{
+    const paid=monthPmts.filter(p=>p.staffId===s.id).reduce((sum,p)=>sum+p.amount,0);
+    const pending=Math.max(0,(s.salary||0)-paid);
+    return `<div class="sal-card">
+      <div class="sal-top">
+        <span class="sal-av">${s.av}</span>
+        <div><div class="sal-name">${s.name}</div><div class="sal-role">${s.role}</div></div>
+        <span class="badge ${paid>=(s.salary||0)?'badge-green':paid>0?'badge-yellow':'badge-red'}" style="margin-left:auto">${paid>=(s.salary||0)?'Paid':paid>0?'Partial':'Pending'}</span>
+      </div>
+      <div class="sal-row">
+        <div class="sal-item"><div class="sal-val">₹${(s.salary||0).toLocaleString()}</div><div class="sal-lbl">Monthly</div></div>
+        <div class="sal-item"><div class="sal-val" style="color:var(--green)">₹${paid.toLocaleString()}</div><div class="sal-lbl">Paid</div></div>
+        <div class="sal-item"><div class="sal-val" style="color:var(--red)">₹${pending.toLocaleString()}</div><div class="sal-lbl">Pending</div></div>
+        <div class="sal-item"><div class="sal-val">${staff.length>0?Math.round(paid/(s.salary||1)*100):0}%</div><div class="sal-lbl">Complete</div></div>
+      </div>
+      <div class="sal-actions">
+        <input type="number" class="sal-inp" id="pay-amt-${s.id}" placeholder="₹ Amount" value="${pending||''}"/>
+        <input type="text" class="sal-inp" id="pay-note-${s.id}" placeholder="Note (optional)" style="flex:1"/>
+        <button class="btn btn-green btn-sm" onclick="payStaff('${s.id}')">💰 Pay</button>
+      </div>
+      ${monthPmts.filter(p=>p.staffId===s.id).length?`<div style="margin-top:8px;font-size:10px;color:var(--g);font-family:'Share Tech Mono'">Transactions: ${monthPmts.filter(p=>p.staffId===s.id).map(p=>'₹'+p.amount+(p.note?' ('+p.note+')':'')).join(', ')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+function payStaff(id){
+  const month=$('sal-month').value;
+  const amt=parseInt($('pay-amt-'+id).value)||0;
+  const note=$('pay-note-'+id).value||'';
+  if(!amt){notif('Amount daalo!','err');return;}
+  payments.push({staffId:id,amount:amt,month,note,date:new Date().toISOString().split('T')[0],ts:Date.now()});
+  renderSalary();renderDashboard();
+  saveData();
+  const s=staff.find(x=>x.id===id);
+  notif('✅ ₹'+amt+' paid to '+s?.name,'ok');
+}
+function quickPay(id){
+  closeModal('modal-profile');
+  goPage('salary',document.querySelector('.sb-item[onclick*="salary"]'));
+  setTimeout(()=>{const el=$('pay-amt-'+id);if(el){el.focus();el.scrollIntoView({behavior:'smooth'});}},200);
+}
+
+// ══ REPORT ══
+function renderReport(){
+  const month=$('rpt-month').value;
+  const totalStaff=staff.length;
+  const monthPmts=payments.filter(p=>p.month===month);
+  const totalPaid=monthPmts.reduce((s,p)=>s+p.amount,0);
+  const attDays=Object.keys(attendance);
+  const monthDays=attDays.filter(d=>d.startsWith(month.split(' ')[0]));
+  const avgAtt=staff.length&&monthDays.length?
+    Math.round(monthDays.reduce((s,d)=>s+Object.values(attendance[d]||{}).filter(v=>v==='P').length,0)/(monthDays.length*Math.max(staff.length,1))*100):0;
+
+  $('report-content').innerHTML=`
+    <div class="report-box">
+      <div class="rb-title">RRTM MONTHLY REPORT</div>
+      <div class="rb-sub">${month} · Generated: ${new Date().toLocaleDateString('en-IN')}</div>
+      <div class="report-grid">
+        <div class="rg-item"><div class="rg-val">${totalStaff}</div><div class="rg-lbl">Total Staff</div></div>
+        <div class="rg-item"><div class="rg-val">${avgAtt}%</div><div class="rg-lbl">Avg Attendance</div></div>
+        <div class="rg-item"><div class="rg-val">₹${totalPaid.toLocaleString()}</div><div class="rg-lbl">Total Paid</div></div>
+      </div>
+    </div>
+    <div class="report-box">
+      <div class="rb-title">STAFF-WISE REPORT</div>
+      <div class="tbl-wrap" style="margin:0">
+        <table>
+          <thead><tr>
+            <th>Staff</th><th>Role</th><th>Days Present</th><th>Days Absent</th><th>Salary</th><th>Paid</th><th>Status</th>
+          </tr></thead>
+          <tbody>
+            ${staff.map(s=>{
+              const present=Object.values(attendance).filter(d=>d[s.id]==='P').length;
+              const absent=Object.values(attendance).filter(d=>d[s.id]==='A').length;
+              const paid=monthPmts.filter(p=>p.staffId===s.id).reduce((sum,p)=>sum+p.amount,0);
+              const done=paid>=(s.salary||0);
+              return `<tr>
+                <td><span style="font-size:16px">${s.av}</span> <b>${s.name}</b><div style="font-size:9px;color:var(--g);font-family:Share Tech Mono">${s.id}</div></td>
+                <td style="color:var(--g)">${s.role}</td>
+                <td><span class="badge badge-green">${present} days</span></td>
+                <td><span class="badge badge-red">${absent} days</span></td>
+                <td>₹${(s.salary||0).toLocaleString()}</td>
+                <td style="color:var(--green)">₹${paid.toLocaleString()}</td>
+                <td><span class="badge ${done?'badge-green':'badge-yellow'}">${done?'Paid':'Pending'}</span></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="report-box">
+      <div class="rb-title">PAYMENT HISTORY</div>
+      ${monthPmts.length?`<div class="tbl-wrap" style="margin:0"><table>
+        <thead><tr><th>Staff</th><th>Amount</th><th>Date</th><th>Note</th></tr></thead>
+        <tbody>${monthPmts.map(p=>{const s=staff.find(x=>x.id===p.staffId);return `<tr><td><b>${s?.name||p.staffId}</b></td><td style="color:var(--green)">₹${p.amount.toLocaleString()}</td><td style="color:var(--g);font-family:Share Tech Mono;font-size:11px">${p.date}</td><td style="color:var(--g)">${p.note||'—'}</td></tr>`;}).join('')}</tbody>
+      </table></div>`:'<div style="color:var(--g);font-size:12px;font-family:Share Tech Mono;padding:10px">Koi payment nahi ki gayi is month.</div>'}
+    </div>`;
+}
+function printReport(){window.print();}
+
+// ══ TASKS ══
+function renderTasks(){
+  $('tasks-list').innerHTML=tasks.length?tasks.map((t,i)=>{
+    const s=staff.find(x=>x.id===t.staffId);
+    const pc={'high':'badge-red','medium':'badge-yellow','low':'badge-green'};
+    const ps={'pending':'badge-yellow','inprogress':'badge-blue','done':'badge-green'};
+    return `<div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:14px 16px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="flex:1"><div style="font-size:14px;font-weight:700">${t.title}</div><div style="font-size:10px;color:var(--g)">${s?.name||'All'} · Due: ${t.due||'—'}</div></div>
+        <span class="badge ${pc[t.priority]}">${t.priority}</span>
+        <select class="fs" style="width:auto;padding:4px 8px;font-size:11px" onchange="tasks[${i}].status=this.value;saveData();renderTasks()">
+          <option value="pending" ${t.status==='pending'?'selected':''}>⏳ Pending</option>
+          <option value="inprogress" ${t.status==='inprogress'?'selected':''}>🔄 In Progress</option>
+          <option value="done" ${t.status==='done'?'selected':''}>✅ Done</option>
+        </select>
+        <button class="btn btn-red btn-sm" onclick="tasks.splice(${i},1);saveData();renderTasks()">🗑</button>
+      </div>
+      ${t.desc?`<div style="font-size:11px;color:var(--g);padding:8px;background:var(--s2);border-radius:4px">${t.desc}</div>`:''}
+    </div>`;
+  }).join(''):'<div style="color:var(--g);font-size:12px;font-family:Share Tech Mono;text-align:center;padding:40px">Koi task assign nahi kiya gaya.</div>';
+}
+function openAddTask(){
+  staff.length && ($('tk-staff').innerHTML=staff.map(s=>`<option value="${s.id}">${s.name}</option>`).join(''));
+  openModal('modal-task');
+}
+function saveTask(){
+  const title=$('tk-title').value.trim();
+  if(!title){notif('Task title daalo!','err');return;}
+  tasks.push({title,staffId:$('tk-staff').value,priority:$('tk-priority').value,due:$('tk-due').value,status:$('tk-status').value,desc:$('tk-desc').value,ts:Date.now()});
+  closeModal('modal-task');renderTasks();
+  saveData();
+  notif('✅ Task assigned!','ok');
+}
+
+// ══ NOTICES ══
+function renderNotices(){
+  $('notices-list').innerHTML=notices.length?notices.slice().reverse().map((n,i)=>{
+    const tc={'info':'badge-blue','warning':'badge-yellow','urgent':'badge-red'};
+    return `<div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:16px;margin-bottom:8px;border-left:3px solid ${n.type==='urgent'?'var(--red)':n.type==='warning'?'var(--yellow)':'var(--blue)'}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="flex:1;font-family:'Bebas Neue';font-size:16px;letter-spacing:2px">${n.title}</div>
+        <span class="badge ${tc[n.type]}">${n.type}</span>
+        <div style="font-size:9px;color:var(--g);font-family:Share Tech Mono">${n.date}</div>
+        <button class="btn btn-red btn-sm" onclick="notices.splice(notices.length-1-${i},1);saveData();renderNotices()">🗑</button>
+      </div>
+      <div style="font-size:12px;color:var(--lg);line-height:1.7">${n.msg}</div>
+    </div>`;
+  }).join(''):'<div style="color:var(--g);font-size:12px;font-family:Share Tech Mono;text-align:center;padding:40px">Koi notice nahi hai.</div>';
+}
+function openAddNotice(){
+  $('nc-date').value=new Date().toISOString().split('T')[0];
+  openModal('modal-notice');
+}
+function saveNotice(){
+  const title=$('nc-title').value.trim();
+  if(!title){notif('Title daalo!','err');return;}
+  notices.push({title,msg:$('nc-msg').value,type:$('nc-type').value,date:$('nc-date').value,ts:Date.now()});
+  closeModal('modal-notice');renderNotices();
+  saveData();
+  notif('📢 Notice posted!','ok');
+}
+
+// ══ UTILS ══
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-ov').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+function $(id){return document.getElementById(id);}
+function notif(msg,type=''){
+  const n=$('notif');n.textContent=msg;
+  n.className='notif'+(type?' '+type:'');
+  n.classList.add('show');setTimeout(()=>n.classList.remove('show'),3000);
+}
+// Update date every minute
+setInterval(()=>{
+  const ds=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  $('tn-date').textContent=ds;
+},60000);
+</script>
+</body>
+</html>
